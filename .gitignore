@@ -1,0 +1,12 @@
+build
+dist
+git_*
+.*project
+.settings
+*.egg-info
+__pycache__
+*.pyc
+*~
+TCGA
+GTEx
+*.gz
