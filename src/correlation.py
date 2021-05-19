@@ -206,7 +206,7 @@ def self_correlation_filter(cnt_thres = 5, qthres = 0.05):
     
     data_group = data.groupby(flag_family, axis=1)
     
-    merge = []
+    #merge = []
     merge_centroid = []
     
     for gid, data in data_group:    
@@ -214,7 +214,7 @@ def self_correlation_filter(cnt_thres = 5, qthres = 0.05):
             print('jump', gid, 'by low dataset count', data.shape[1])
             continue
         
-        merge.append(data)
+        #merge.append(data)
         
         # every element must have effect value
         data = data.loc[(~data.isnull()).sum(axis=1) >= cnt_thres]
@@ -223,15 +223,16 @@ def self_correlation_filter(cnt_thres = 5, qthres = 0.05):
         
         merge_centroid.append(arr)
     
-    data = pandas.concat(merge, axis=1, join='inner')
-    data.to_csv(output + '.filter.gz', sep='\t', index_label=False, compression='gzip')
+    #data = pandas.concat(merge, axis=1, join='inner')
+    #data.to_csv(output + '.filter.gz', sep='\t', index_label=False, compression='gzip')
     
     data_centroid = pandas.concat(merge_centroid, axis=1, join='outer', sort=False)
     data_centroid_compact = data_centroid.dropna()
     
     print(data_centroid.shape, data_centroid_compact.shape)
     
-    data_centroid.to_csv(output, sep='\t', index_label=False)
+    # here is the signature matrix in CytoSig prediction model
+    data_centroid_compact.to_csv(output, sep='\t', index_label=False)
 
 
 
@@ -244,7 +245,7 @@ def main():
     
     if len(sys.argv) == 1:
         # merge result files
-        #merge_files(run_lst)
+        merge_files(run_lst)
         self_correlation_filter()
     else:
         # compute correlations
