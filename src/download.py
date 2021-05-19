@@ -10,7 +10,8 @@ base_path = os.path.dirname(base_path)
 data_path = os.path.join(base_path, 'data')
 src_path = os.path.join(base_path, 'src')
 
-url = 'http://127.0.0.1:8000/download'
+url = 'https://hpc.nih.gov/~Jiang_Lab/CytoSig'
+
 for f in ['diff.merge', 'expression_cohorts.tar']:
     urllib.request.urlretrieve(os.path.join(url, f + '.gz'), os.path.join(data_path, f + '.gz'))
 
