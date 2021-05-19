@@ -168,6 +168,70 @@ def merge_files(run_lst):
                             
             data['FDR'] = multipletests(data['p'], method='fdr_bh')[1]
             data.to_csv(out + '.stat', sep='\t', index_label=False)
+            
+    
+
+
+def self_correlation_filter(cnt_thres = 5, qthres = 0.05):
+    signal_rename_map = {
+        'IFNA': 'IFN1',
+        'IFNB': 'IFN1',
+        
+        'IL36A': 'IL36',
+        'IL36B': 'IL36',
+        'IL36G': 'IL36',
+    }
+
+    output = os.path.join(data_path, 'output', 'diff.centroid')
+
+    included = None
+    
+    for cohort in ['TCGA', 'GTEx']:
+        data_Gene = pandas.read_csv(os.path.join(data_path, 'output', 'merge.Gene.' + cohort + '.stat') , sep='\t', index_col=0)
+        data_Receptor = pandas.read_csv(os.path.join(data_path, 'Output', 'merge.Receptor.' + cohort + '.stat') , sep='\t', index_col=0)
+        
+        s = data_Gene.index[data_Gene['FDR'] < qthres].union(data_Receptor.index[data_Receptor['FDR'] < qthres])
+        
+        if included is None:
+            included = s
+        else:
+            included = included.intersection(s)
+    
+    data = pandas.read_csv(os.path.join(data_path, 'diff.merge.gz'), sep='\t', index_col=0)
+    data = data[included]
+    
+    # family merge, merge highly similar signals
+    flag_family = [v.split('@')[0].split('&')[0] for v in data.columns]
+    flag_family = [signal_rename_map[v] if signal_rename_map.get(v) is not None else v for v in flag_family]
+    
+    data_group = data.groupby(flag_family, axis=1)
+    
+    merge = []
+    merge_centroid = []
+    
+    for gid, data in data_group:    
+        if data.shape[1] < cnt_thres:
+            print('jump', gid, 'by low dataset count', data.shape[1])
+            continue
+        
+        merge.append(data)
+        
+        # every element must have effect value
+        data = data.loc[(~data.isnull()).sum(axis=1) >= cnt_thres]
+        arr = data.median(axis=1)
+        arr.name = gid
+        
+        merge_centroid.append(arr)
+    
+    data = pandas.concat(merge, axis=1, join='inner')
+    data.to_csv(output + '.filter.gz', sep='\t', index_label=False, compression='gzip')
+    
+    data_centroid = pandas.concat(merge_centroid, axis=1, join='outer', sort=False)
+    data_centroid_compact = data_centroid.dropna()
+    
+    print(data_centroid.shape, data_centroid_compact.shape)
+    
+    data_centroid.to_csv(output, sep='\t', index_label=False)
 
 
 
@@ -180,8 +244,8 @@ def main():
     
     if len(sys.argv) == 1:
         # merge result files
-        merge_files(run_lst)
-    
+        #merge_files(run_lst)
+        self_correlation_filter()
     else:
         # compute correlations
         self_correlation_test_all(run_lst, gene_map)

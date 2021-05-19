@@ -24,4 +24,4 @@ for i in range(N):
     if os.path.exists(err_log): os.remove(err_log)
     if os.path.exists(out_log): os.remove(out_log)
     
-    os.system(' '.join([submit_prefix, '-o', out_log, '-e', err_log , os.path.join(src_path, 'correlation.py'), str(i), str(N)]))
+    os.system(' '.join([submit_prefix, '-o', out_log, '-e', err_log , os.path.join(src_path, 'run_wrapper.sh'), str(i), str(N)]))
