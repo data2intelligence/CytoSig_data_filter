@@ -188,7 +188,7 @@ def self_correlation_filter(cnt_thres = 5, qthres = 0.05):
     
     for cohort in ['TCGA', 'GTEx']:
         data_Gene = pandas.read_csv(os.path.join(data_path, 'output', 'merge.Gene.' + cohort + '.stat') , sep='\t', index_col=0)
-        data_Receptor = pandas.read_csv(os.path.join(data_path, 'Output', 'merge.Receptor.' + cohort + '.stat') , sep='\t', index_col=0)
+        data_Receptor = pandas.read_csv(os.path.join(data_path, 'output', 'merge.Receptor.' + cohort + '.stat') , sep='\t', index_col=0)
         
         s = data_Gene.index[data_Gene['FDR'] < qthres].union(data_Receptor.index[data_Receptor['FDR'] < qthres])
         
